@@ -10,7 +10,9 @@ export default $config({
         }
     },
     async run() {
-        const vpc = new sst.aws.Vpc("kcpc-vpc")
+        const vpc = new sst.aws.Vpc("kcpc-vpc", {
+            bastion: true,
+        })
 
         // image bucket for part images
         const imageBucket = new sst.aws.Bucket("kcpc-image-store")
@@ -19,26 +21,22 @@ export default $config({
         const db = new sst.aws.Aurora("kcpc-db", {
             engine: "postgres",
             vpc,
-            dev: {
-                username: "postgres",
-                password: "password",
-                database: "kcpc",
-                host: "localhost",
-                port: 5432,
-            },
         })
 
         // main remix app
         const remix = new sst.aws.Remix("kcpc-web", {
             link: [imageBucket, db],
+            domain: "kcpc.lucidine.com",
         })
 
         return {
+            bucket: imageBucket.name,
             host: db.host,
             port: db.port,
             username: db.username,
             password: db.password,
             database: db.database,
+            url: remix.url,
         }
     },
 })

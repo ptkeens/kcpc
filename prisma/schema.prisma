@@ -1,0 +1,152 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["relationJoins"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String
+  username  String
+  password  String // Hashed password
+  isEnabled Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  Manufacturers Manufacturer[]
+  KitFamily     KitFamily[]
+  Kit           Kit[]
+
+  @@unique([email])
+  @@unique([username])
+  @@map("users")
+}
+
+model Manufacturer {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign keys
+  addedByUserId String @db.Uuid
+
+  // Relations
+  KitFamily KitFamily[]
+  User      User        @relation(fields: [addedByUserId], references: [id])
+
+  @@index([name])
+  @@index([addedByUserId])
+  @@map("manufacturers")
+}
+
+model KitFamily {
+  id   String @id @default(uuid()) @db.Uuid
+  name String
+
+  // Foreign keys
+  manufacturerId String @db.Uuid
+  addedByUserId  String @db.Uuid
+
+  // Relations
+  Manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id])
+  Kit          Kit[]
+  User         User         @relation(fields: [addedByUserId], references: [id])
+
+  @@index([manufacturerId])
+  @@index([addedByUserId])
+  @@map("kitFamily")
+}
+
+model Kit {
+  id   String @id @default(uuid()) @db.Uuid
+  name String
+  year Int
+
+  // Foreign keys
+  kitFamilyId   String @db.Uuid
+  addedByUserId String @db.Uuid
+
+  // Relations
+  KitFamily KitFamily @relation(fields: [kitFamilyId], references: [id])
+  User      User      @relation(fields: [addedByUserId], references: [id])
+  PartKit   PartKit[]
+
+  @@index([kitFamilyId])
+  @@index([addedByUserId])
+  @@map("kits")
+}
+
+model Part {
+  id                     String  @id @default(uuid()) @db.Uuid
+  name                   String
+  // the manufacturer part number may differ from the part number assigned by the kit
+  manufacturerPartNumber String?
+  description            String?
+  s3Key                  String?
+  weight                 Float?
+
+  // Relations
+  PartKit PartKit[]
+
+  @@map("parts")
+}
+
+model PartKit {
+  id            String @id @default(uuid()) @db.Uuid
+  // this is the part number the kit assigns
+  kitPartNumber String
+
+  // Foreign keys
+  partId String @db.Uuid
+  kitId  String @db.Uuid
+
+  // Relations
+  Part             Part               @relation(fields: [partId], references: [id])
+  Kit              Kit                @relation(fields: [kitId], references: [id])
+  PartGroupPartKit PartGroupPartKit[]
+
+  @@index([partId])
+  @@index([kitId])
+  @@map("partKits")
+}
+
+model PartGroup {
+  id           String  @id @default(uuid()) @db.Uuid
+  name         String
+  description  String?
+  displayOrder Int
+
+  // Foreign Keys
+  kitId            String             @db.Uuid
+  PartGroupPartKit PartGroupPartKit[]
+
+  @@index([kitId])
+  @@map("partGroups")
+}
+
+model PartGroupPartKit {
+  id          String @id @default(uuid()) @db.Uuid
+  partGroupId String @db.Uuid
+  partKitId   String @db.Uuid
+  quantity    Int
+
+  // Relations
+  PartGroup PartGroup @relation(fields: [partGroupId], references: [id])
+  PartKit   PartKit   @relation(fields: [partKitId], references: [id])
+
+  @@index([partGroupId])
+  @@index([partKitId])
+  @@map("partGroupPartKits")
+}
