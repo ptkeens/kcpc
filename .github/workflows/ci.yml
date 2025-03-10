@@ -23,3 +23,6 @@ jobs:
 
             - name: Run typecheck
               run: bun run typecheck:ci
+
+            - name: Run tests
+              run: bun test
