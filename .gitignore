@@ -10,3 +10,6 @@
 
 # prisma
 .env
+
+# codegen
+api/graphql/generated.ts
