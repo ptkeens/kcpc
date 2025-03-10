@@ -168,15 +168,6 @@ export default function Login() {
                             Create one
                         </a>
                     </p>
-                    <div className="w-full border-t pt-4">
-                        <Button
-                            variant="outline"
-                            className="w-full"
-                            onClick={() => navigate("/")}
-                        >
-                            Continue Browsing Without Account
-                        </Button>
-                    </div>
                 </CardFooter>
             </Card>
         </div>
