@@ -9,6 +9,12 @@ generator client {
   previewFeatures = ["relationJoins"]
 }
 
+// Add Pothos generator for GraphQL types
+generator pothos {
+  provider = "prisma-pothos-types"
+  output   = "../api/graphql/generated.ts"
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")

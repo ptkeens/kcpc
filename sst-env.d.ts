@@ -16,6 +16,11 @@ declare module "sst" {
       "type": "sst.aws.Aurora"
       "username": string
     }
+    "kcpc-graphql": {
+      "name": string
+      "type": "sst.aws.Function"
+      "url": string
+    }
     "kcpc-image-store": {
       "name": string
       "type": "sst.aws.Bucket"

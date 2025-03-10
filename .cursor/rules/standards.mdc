@@ -1,11 +1,15 @@
 ---
-description: Overall code suggestion guidance and infrastructure settings
+description: Model instructions
 globs: 
 alwaysApply: false
 ---
-This project is an SST3 typescript project using AWS as the backing infrastructure provider. We are using react-router for the frontend as well. Whenever you are supplying code-related suggestions that mention functions from a package, please check the root `package.json` file to see what version is in use, and ensure your suggetsions match up with the specified version. This project uses bun to manage dependencies. I am using Prisma with a postgres serverless database. Authentication should leverage the db and JWT.
-
-Please do not make changes to the code, suggest them and ask me if I would like you to apply them.
-Slow down and think about your suggestions before supplying a solution, double check your reasoning and question your assumptions.
-
-Create files with camel-case or pascal-case names. Do the same for variables and functions.
+- This project is an SST3 typescript project using AWS as the backing infrastructure provider. 
+- We are using react-router for the frontend as well. 
+- Whenever you are supplying code-related suggestions that mention functions from a package, please check the root `package.json` file to see what version is in use, and ensure your suggetsions match up with the specified version. 
+- This project uses bun to manage dependencies. 
+- I am using Prisma with an aurora serverless postgres database. 
+- Authentication should leverage the db and JWT.
+- This project uses Bun
+- Please do not make changes to the code, suggest them and ask me if I would like you to apply them.
+- Slow down and think about your suggestions before supplying a solution, double check your reasoning and question your assumptions.
+- Create files with camel-case or pascal-case names. Do the same for variables and functions.
