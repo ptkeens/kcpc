@@ -1,0 +1,12 @@
+---
+description: Domain concepts
+globs: 
+alwaysApply: false
+---
+Kit cars are hobbyist cars assembled by everyday people.
+
+A kit is made by a manufacturer, such as Factory Five.
+There may be multiple versions of a given kit car, so these are organized into a Kit Family.
+A given Kit is a version of the physical kit car, belonging to a Kit family and manufacturer.
+A kit is made up of many parts, organized into groups (eg front suspension, rear suspension, brakes, etc).
+Parts belong to groups that are assigned to the kit
