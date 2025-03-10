@@ -1,0 +1,8 @@
+---
+description: What is the purpose of this saas app?
+globs: 
+alwaysApply: false
+---
+We are creating this app to help kit car enthusiasts keep track of the parts that make up their hobby cars. Kit car providers often give long lists of part names with part numbers and no grpahics to speak of. I am creating this site to make this process easier to manage for the end-consumer.
+
+The workflow of an end-user would be to either reference an existing kit someone else has added to the site, or to contribute by creating one and/or working on an existing one.
