@@ -15,7 +15,7 @@
     "typecheck": "react-router typegen && tsc",
     "typecheck:ci": "react-router typegen && tsc --skipLibCheck --skipDefaultLibCheck",
     "db:seed": "tsx prisma/seed.ts",
-    "db:migrate": "prisma migrate deploy",
+    "db:migrate": "prisma migrate dev",
     "db:migrate:new": "prisma migrate dev --create-only --name"
   },
   "dependencies": {
