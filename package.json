@@ -16,7 +16,8 @@
     "typecheck:ci": "react-router typegen && tsc --skipLibCheck --skipDefaultLibCheck",
     "db:seed": "tsx prisma/seed.ts",
     "db:migrate": "prisma migrate dev",
-    "db:migrate:new": "prisma migrate dev --create-only --name"
+    "db:migrate:new": "prisma migrate dev --create-only --name",
+    "db:reset": "bun prisma migrate reset --force"
   },
   "dependencies": {
     "@pothos/core": "4.5.0",
