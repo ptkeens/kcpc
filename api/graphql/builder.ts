@@ -22,4 +22,4 @@ export const builder = new SchemaBuilder<{
 builder.queryType({})
 
 // Add a default Mutation type
-// builder.mutationType({})
+builder.mutationType({})

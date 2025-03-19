@@ -38,7 +38,6 @@ const yoga = createYoga({
 export const handler = async (event) => {
     // Handle OPTIONS method for CORS preflight requests
     if (event.requestContext?.http?.method === "OPTIONS") {
-        console.log("Handling OPTIONS preflight request")
         return {
             statusCode: 200,
             headers: corsHeaders,
@@ -48,7 +47,6 @@ export const handler = async (event) => {
 
     // Handle a root path health check
     if (event.rawPath === "/" && event.requestContext?.http?.method === "GET") {
-        console.log("Handling root path GET request with health check")
         return {
             statusCode: 200,
             headers: {
@@ -65,11 +63,13 @@ export const handler = async (event) => {
     // Handle potential errors
     try {
         // Process the body - API Gateway can send base64 encoded bodies
-        let body = event.body
-        if (body && event.isBase64Encoded) {
-            body = Buffer.from(body, "base64").toString("utf8")
-            console.log("Decoded base64 body:", body)
-        }
+        const body = (() => {
+            if (!event.body) return null
+            if (event.isBase64Encoded) {
+                return Buffer.from(event.body, "base64").toString("utf8")
+            }
+            return event.body
+        })()
 
         // Create proper headers - ensure content-type is set
         const headers = {
@@ -79,10 +79,6 @@ export const handler = async (event) => {
                 event.headers?.["content-type"] || "application/json",
         }
 
-        // Log whether this is a POST request and has a body
-        console.log("Is POST:", event.requestContext?.http?.method === "POST")
-        console.log("Body present:", !!body)
-
         // Use GraphQL Yoga with the API Gateway event - constructing the URL carefully
         const url = new URL(
             event.rawPath +
@@ -90,23 +86,14 @@ export const handler = async (event) => {
             "http://localhost" // dummy base URL, will be ignored
         )
 
-        console.log("Constructed URL:", url.toString())
-
         const response = await yoga.fetch(url, {
             method: event.requestContext?.http?.method || "POST",
             headers: headers,
             body: body,
         })
 
-        // Log the response status
-        console.log("Response status:", response.status)
-
-        // Clone the response to read the body
-        const clonedResponse = response.clone()
-
         // Get the response body for logging
-        const responseBody = await clonedResponse.text()
-        console.log("Response body:", responseBody)
+        const responseBody = await response.text()
 
         // Return the response
         return {
@@ -120,9 +107,6 @@ export const handler = async (event) => {
     } catch (error) {
         // Detailed error logging
         console.error("GraphQL API error:", error)
-        console.error("Error name:", error.name)
-        console.error("Error message:", error.message)
-        console.error("Error stack:", error.stack)
 
         // Return a properly formatted error response
         return {
