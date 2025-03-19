@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider        = "prisma-client-js"
   previewFeatures = ["relationJoins"]
@@ -26,9 +20,9 @@ model User {
   email     String
   username  String
   password  String // Hashed password
-  isEnabled Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  isEnabled Boolean  @default(true) @map("is_enabled")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   Manufacturers Manufacturer[]
   KitFamily     KitFamily[]
@@ -42,11 +36,11 @@ model User {
 model Manufacturer {
   id        String   @id @default(uuid()) @db.Uuid
   name      String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   // Foreign keys
-  addedByUserId String @db.Uuid
+  addedByUserId String @map("added_by_user_id") @db.Uuid
 
   // Relations
   KitFamily KitFamily[]
@@ -62,8 +56,8 @@ model KitFamily {
   name String
 
   // Foreign keys
-  manufacturerId String @db.Uuid
-  addedByUserId  String @db.Uuid
+  manufacturerId String @map("manufacturer_id") @db.Uuid
+  addedByUserId  String @map("added_by_user_id") @db.Uuid
 
   // Relations
   Manufacturer Manufacturer @relation(fields: [manufacturerId], references: [id])
@@ -72,7 +66,7 @@ model KitFamily {
 
   @@index([manufacturerId])
   @@index([addedByUserId])
-  @@map("kitFamily")
+  @@map("kit_family")
 }
 
 model Kit {
@@ -81,8 +75,8 @@ model Kit {
   year Int
 
   // Foreign keys
-  kitFamilyId   String @db.Uuid
-  addedByUserId String @db.Uuid
+  kitFamilyId   String @map("kit_family_id") @db.Uuid
+  addedByUserId String @map("added_by_user_id") @db.Uuid
 
   // Relations
   KitFamily KitFamily @relation(fields: [kitFamilyId], references: [id])
@@ -98,9 +92,9 @@ model Part {
   id                     String  @id @default(uuid()) @db.Uuid
   name                   String
   // the manufacturer part number may differ from the part number assigned by the kit
-  manufacturerPartNumber String?
+  manufacturerPartNumber String? @map("manufacturer_part_number")
   description            String?
-  s3Key                  String?
+  s3Key                  String? @map("s3_key")
   weight                 Float?
 
   // Relations
@@ -112,40 +106,43 @@ model Part {
 model PartKit {
   id            String @id @default(uuid()) @db.Uuid
   // this is the part number the kit assigns
-  kitPartNumber String
+  kitPartNumber String @map("kit_part_number")
 
   // Foreign keys
-  partId String @db.Uuid
-  kitId  String @db.Uuid
+  partId String @map("part_id") @db.Uuid
+  kitId  String @map("kit_id") @db.Uuid
 
   // Relations
-  Part             Part               @relation(fields: [partId], references: [id])
-  Kit              Kit                @relation(fields: [kitId], references: [id])
-  PartGroupPartKit PartGroupPartKit[]
+  Part                   Part                     @relation(fields: [partId], references: [id])
+  Kit                    Kit                      @relation(fields: [kitId], references: [id])
+  PartGroupPartKit       PartGroupPartKit[]
+  SourceConnections      PartConnection[]         @relation("SourceConnections")
+  TargetConnections      PartConnection[]         @relation("TargetConnections")
+  PartConnectionFastener PartConnectionFastener[]
 
   @@index([partId])
   @@index([kitId])
-  @@map("partKits")
+  @@map("part_kits")
 }
 
 model PartGroup {
   id           String  @id @default(uuid()) @db.Uuid
   name         String
   description  String?
-  displayOrder Int
+  displayOrder Int     @map("display_order")
 
   // Foreign Keys
-  kitId            String             @db.Uuid
+  kitId            String             @map("kit_id") @db.Uuid
   PartGroupPartKit PartGroupPartKit[]
 
   @@index([kitId])
-  @@map("partGroups")
+  @@map("part_groups")
 }
 
 model PartGroupPartKit {
   id          String @id @default(uuid()) @db.Uuid
-  partGroupId String @db.Uuid
-  partKitId   String @db.Uuid
+  partGroupId String @map("part_group_id") @db.Uuid
+  partKitId   String @map("part_kit_id") @db.Uuid
   quantity    Int
 
   // Relations
@@ -154,5 +151,43 @@ model PartGroupPartKit {
 
   @@index([partGroupId])
   @@index([partKitId])
-  @@map("partGroupPartKits")
+  @@map("part_group_part_kits")
+}
+
+model PartConnection {
+  id          String  @id @default(uuid()) @db.Uuid
+  description String?
+
+  // The two parts being connected
+  sourcePartKitId String @map("source_part_kit_id") @db.Uuid
+  targetPartKitId String @map("target_part_kit_id") @db.Uuid
+
+  // Relations
+  sourcePart PartKit @relation("SourceConnections", fields: [sourcePartKitId], references: [id])
+  targetPart PartKit @relation("TargetConnections", fields: [targetPartKitId], references: [id])
+
+  // Fasteners join table
+  PartConnectionFastener PartConnectionFastener[]
+
+  @@index([sourcePartKitId])
+  @@index([targetPartKitId])
+  @@map("part_connections")
+}
+
+model PartConnectionFastener {
+  id                String  @id @default(uuid()) @db.Uuid
+  partConnectionId  String  @map("part_connection_id") @db.Uuid
+  fastenerPartKitId String  @map("fastener_part_kit_id") @db.Uuid
+  quantity          Int
+  torqueValue       Float?  @map("torque_value")
+  torqueUnit        String? @map("torque_unit") // e.g., "ft-lb", "Nm"
+  notes             String?
+
+  // Relations
+  partConnection PartConnection @relation(fields: [partConnectionId], references: [id])
+  fastener       PartKit        @relation(fields: [fastenerPartKitId], references: [id])
+
+  @@index([partConnectionId])
+  @@index([fastenerPartKitId])
+  @@map("part_connection_fasteners")
 }
