@@ -2,6 +2,7 @@ import { useAuth } from "./AuthContext"
 import { Button } from "~/components/ui/button"
 import { Link } from "react-router"
 import { ArrowRight } from "lucide-react"
+import { paths } from "~/lib/paths"
 
 export const HomeComponent = () => {
     const { isAuthenticated, user } = useAuth()
@@ -45,7 +46,7 @@ export const HomeComponent = () => {
                                 parts.
                             </p>
                             <Button asChild size="lg">
-                                <Link to="/login">
+                                <Link to={paths.auth.login()}>
                                     Sign Up or Login{" "}
                                     <ArrowRight className="ml-2 h-4 w-4" />
                                 </Link>

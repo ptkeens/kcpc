@@ -3,6 +3,7 @@ import { useEffect } from "react"
 import { useAuth } from "../components/AuthContext"
 import { ThemeToggle } from "~/components/themeToggle"
 import { ClientOnly } from "~/components/clientOnly"
+import { paths } from "~/lib/paths"
 
 export function meta() {
     return [
@@ -68,7 +69,7 @@ export default function Layout() {
                         ) : (
                             <li>
                                 <Link
-                                    to="/login"
+                                    to={paths.auth.login()}
                                     className="block py-2 px-4 rounded hover:bg-muted"
                                 >
                                     Login / Sign Up
