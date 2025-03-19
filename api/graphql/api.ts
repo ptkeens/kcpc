@@ -83,7 +83,7 @@ export const handler = async (event) => {
         const url = new URL(
             event.rawPath +
                 (event.rawQueryString ? `?${event.rawQueryString}` : ""),
-            "http://localhost" // dummy base URL, will be ignored
+            "http://localhost"
         )
 
         const response = await yoga.fetch(url, {
@@ -92,9 +92,6 @@ export const handler = async (event) => {
             body: body,
         })
 
-        // Get the response body for logging
-        const responseBody = await response.text()
-
         // Return the response
         return {
             statusCode: response.status,
@@ -102,7 +99,7 @@ export const handler = async (event) => {
                 ...Object.fromEntries(response.headers.entries()),
                 ...corsHeaders,
             },
-            body: responseBody,
+            body: response.body,
         }
     } catch (error) {
         // Detailed error logging
