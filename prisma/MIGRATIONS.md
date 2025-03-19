@@ -9,9 +9,6 @@ This document describes how to manage database migrations in the project using P
 To apply all existing migrations to your database:
 
 ```bash
-# Using npm
-npm run db:migrate
-
 # Using bun
 bun run db:migrate
 ```
@@ -26,9 +23,6 @@ To create a new migration for database schema changes:
 2. Then run:
 
 ```bash
-# Using npm
-npm run db:migrate:new your-migration-name
-
 # Using bun
 bun run db:migrate:new your-migration-name
 ```
@@ -40,7 +34,7 @@ This will create a new migration file based on the difference between your curre
 For development, you may want to use Prisma's full development migration command:
 
 ```bash
-npx prisma migrate dev
+bunx prisma migrate dev
 ```
 
 This will create a migration (if there are changes), apply it, and run the seed script.
@@ -50,7 +44,7 @@ This will create a migration (if there are changes), apply it, and run the seed 
 If you need to reset your database (⚠️ CAUTION: destroys all data):
 
 ```bash
-npx prisma migrate reset
+bunx prisma migrate reset
 ```
 
 This will drop the database, recreate it, run all migrations, and seed the database.
