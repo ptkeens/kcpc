@@ -5,12 +5,18 @@
   "engines": {
     "bun": ">=1.2.4"
   },
+  "prisma": {
+    "seed": "tsx prisma/seed.ts"
+  },
   "scripts": {
     "build": "cross-env NODE_ENV=production react-router build",
     "dev": "react-router dev",
     "start": "cross-env NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
-    "typecheck:ci": "react-router typegen && tsc --skipLibCheck --skipDefaultLibCheck"
+    "typecheck:ci": "react-router typegen && tsc --skipLibCheck --skipDefaultLibCheck",
+    "db:seed": "tsx prisma/seed.ts",
+    "db:migrate": "prisma migrate deploy",
+    "db:migrate:new": "prisma migrate dev --create-only --name"
   },
   "dependencies": {
     "@pothos/core": "^4.5.0",
@@ -47,6 +53,7 @@
     "cross-env": "7.0.3",
     "postcss": "8.4.49",
     "tailwindcss": "3.4.16",
+    "tsx": "^4.19.3",
     "typescript": "5.7.2",
     "vite": "5.4.11",
     "vite-tsconfig-paths": "5.1.4"
