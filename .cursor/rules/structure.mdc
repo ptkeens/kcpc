@@ -1,0 +1,11 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+GraphQL API code is in ./api/graphql.
+Schema definitions are found in ./api/graphql/models and should be logically grouped.
+Frontend code is found in ./app/.
+Components are found in ./app/components.
+Routes are found in ./app/routes.
+Prisma-related files are found in ./prisma/.
