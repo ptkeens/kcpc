@@ -11,6 +11,7 @@
   "scripts": {
     "build": "cross-env NODE_ENV=production react-router build",
     "dev": "react-router dev",
+    "sst:dev": "sst dev",
     "start": "cross-env NODE_ENV=production react-router-serve ./build/server/index.js",
     "typecheck": "react-router typegen && tsc",
     "typecheck:ci": "react-router typegen && tsc --skipLibCheck --skipDefaultLibCheck",

@@ -1,10 +1,8 @@
 import { useState } from "react"
 import type { FormEvent } from "react"
-import { Form, useNavigate, useLocation } from "react-router"
-import { useAuth } from "../components/AuthContext"
+import { Form, useNavigate } from "react-router"
 import { Button } from "~/components/ui/button"
 import { Input } from "~/components/ui/input"
-import { Checkbox } from "~/components/ui/checkbox"
 import {
     Card,
     CardContent,
@@ -20,32 +18,34 @@ import { paths } from "~/lib/paths"
 
 export function meta() {
     return [
-        { title: "Login | Kit Car Part Catalog" },
+        { title: "Register | Kit Car Part Catalog" },
         {
             name: "description",
-            content: "Login to access your kit car parts catalog",
+            content: "Create a new account for the kit car parts catalog",
         },
     ]
 }
 
-export default function Login() {
+export default function Register() {
+    const [name, setName] = useState("")
     const [email, setEmail] = useState("")
     const [password, setPassword] = useState("")
+    const [confirmPassword, setConfirmPassword] = useState("")
     const [isLoading, setIsLoading] = useState(false)
     const [error, setError] = useState("")
 
     const navigate = useNavigate()
-    const location = useLocation()
-    const { login } = useAuth()
-
-    // Get the redirect path from the location state or default to home
-    const from = location.state?.from?.pathname || "/"
 
     const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
         event.preventDefault()
 
-        if (!email || !password) {
-            setError("Please enter both email and password")
+        if (!name || !email || !password || !confirmPassword) {
+            setError("Please fill in all fields")
+            return
+        }
+
+        if (password !== confirmPassword) {
+            setError("Passwords do not match")
             return
         }
 
@@ -53,15 +53,14 @@ export default function Login() {
             setIsLoading(true)
             setError("")
 
-            // Call the login function from our auth context
-            await login(email, password)
+            // This is where we would call the registration API
+            // For now, we just simulate a successful registration with a delay
+            await new Promise((resolve) => setTimeout(resolve, 1000))
 
-            // If successful, redirect to the requested page
-            navigate(from, { replace: true })
+            // Redirect to login page after successful registration
+            navigate(paths.auth.login())
         } catch (err) {
-            setError(
-                "Login failed. Please check your credentials and try again."
-            )
+            setError("Registration failed. Please try again.")
         } finally {
             setIsLoading(false)
         }
@@ -78,10 +77,10 @@ export default function Login() {
             <Card className="w-full max-w-md">
                 <CardHeader className="text-center">
                     <CardTitle className="text-3xl font-bold">
-                        Kit Car Parts
+                        Create Account
                     </CardTitle>
                     <CardDescription className="text-muted-foreground">
-                        Sign in to save your catalog data
+                        Register to start managing your kit car parts
                     </CardDescription>
                 </CardHeader>
 
@@ -95,8 +94,25 @@ export default function Login() {
                     <Form
                         method="post"
                         onSubmit={handleSubmit}
-                        className="space-y-6"
+                        className="space-y-4"
                     >
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="name"
+                                className="text-sm font-medium"
+                            >
+                                Full Name
+                            </label>
+                            <Input
+                                id="name"
+                                name="name"
+                                type="text"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                required
+                            />
+                        </div>
+
                         <div className="space-y-2">
                             <label
                                 htmlFor="email"
@@ -131,45 +147,43 @@ export default function Login() {
                             />
                         </div>
 
-                        <div className="flex items-center justify-between">
-                            <div className="flex items-center gap-2">
-                                <Checkbox id="remember-me" name="remember-me" />
-                                <label
-                                    htmlFor="remember-me"
-                                    className="text-sm"
-                                >
-                                    Remember me
-                                </label>
-                            </div>
-
-                            <div className="text-sm">
-                                <a
-                                    href="#"
-                                    className="text-primary hover:underline"
-                                >
-                                    Forgot password?
-                                </a>
-                            </div>
+                        <div className="space-y-2">
+                            <label
+                                htmlFor="confirmPassword"
+                                className="text-sm font-medium"
+                            >
+                                Confirm Password
+                            </label>
+                            <Input
+                                id="confirmPassword"
+                                name="confirmPassword"
+                                type="password"
+                                value={confirmPassword}
+                                onChange={(e) =>
+                                    setConfirmPassword(e.target.value)
+                                }
+                                required
+                            />
                         </div>
 
                         <Button
                             type="submit"
                             disabled={isLoading}
-                            className="w-full"
+                            className="w-full mt-6"
                         >
-                            {isLoading ? "Signing in..." : "Sign in"}
+                            {isLoading ? "Registering..." : "Register"}
                         </Button>
                     </Form>
                 </CardContent>
 
                 <CardFooter className="flex flex-col space-y-4">
                     <p className="text-sm text-muted-foreground text-center">
-                        Don't have an account?{" "}
+                        Already have an account?{" "}
                         <a
-                            href={paths.auth.register()}
+                            href={paths.auth.login()}
                             className="text-primary hover:underline"
                         >
-                            Create one
+                            Sign in
                         </a>
                     </p>
                 </CardFooter>
