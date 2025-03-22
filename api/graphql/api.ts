@@ -1,6 +1,8 @@
 import { createYoga } from "graphql-yoga"
 import { schema } from "./schema"
-import { prisma } from "./builder"
+import { Context, prisma } from "./builder"
+import jwt from "jsonwebtoken"
+import { User } from "@prisma/client"
 
 // Define CORS headers for all responses
 const corsHeaders = {
@@ -19,10 +21,38 @@ const yoga = createYoga({
     graphqlEndpoint: "/",
     // Disable batching to simplify debugging
     batching: false,
-    context: async ({ request }) => {
-        // You can extend this to include authentication and other context
+    context: async ({ request }): Promise<Context> => {
+        if (!process.env.JWT_SECRET) {
+            throw new Error("JWT_SECRET is not set")
+        }
+
+        // Get the authorization header
+        const authHeader = request.headers.get("authorization")
+        let user: User | null = null
+
+        if (authHeader && authHeader.startsWith("Bearer ")) {
+            try {
+                // Extract the token
+                const token = authHeader.substring(7)
+
+                // Verify the token
+                const decoded = jwt.verify(token, process.env.JWT_SECRET) as {
+                    userId: string
+                }
+
+                // Get the user from the database
+                user = await prisma.user.findUnique({
+                    where: { id: decoded.userId },
+                })
+            } catch (error) {
+                // Token verification failed
+                console.error("Auth error:", error)
+            }
+        }
+
         return {
             prisma,
+            user, // Add the authenticated user to the context
         }
     },
     // Add logging for incoming requests

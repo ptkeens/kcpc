@@ -25,13 +25,32 @@ export default $config({
             proxy: true,
         })
 
-        // GraphQL API function with explicitly configured URL
+        // Create SST Secret resources
+        const secrets = {
+            JwtSecret: new sst.Secret("JwtSecret", "CHANGEME"),
+            JwtRefreshSecret: new sst.Secret("JwtRefreshSecret", "CHANGEME"),
+            SessionExpirationTime: new sst.Secret(
+                "SessionExpirationTime",
+                "CHANGEME"
+            ),
+        }
+
+        const allSecrets = Object.values(secrets)
+
+        if (!process.env.DATABASE_URL) {
+            throw new Error("DATABASE_URL is not set")
+        }
+
+        // GraphQL API function with secrets bound
         const graphqlFunction = new sst.aws.Function("kcpc-graphql", {
             handler: "api/graphql/api.handler",
-            link: [db],
+            link: [db, ...allSecrets],
             vpc,
             environment: {
-                DATABASE_URL: $interpolate`postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`,
+                DATABASE_URL: process.env.DATABASE_URL,
+                JWT_SECRET: secrets.JwtSecret.value,
+                JWT_REFRESH_SECRET: secrets.JwtRefreshSecret.value,
+                SESSION_EXPIRATION_TIME: secrets.SessionExpirationTime.value,
             },
             url: {
                 cors: true,

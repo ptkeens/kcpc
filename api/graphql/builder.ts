@@ -1,14 +1,20 @@
 import SchemaBuilder from "@pothos/core"
 import PrismaPlugin from "@pothos/plugin-prisma"
 import type PrismaTypes from "./generated"
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient, User } from "@prisma/client"
 
 // Create a new Prisma client instance
 export const prisma = new PrismaClient()
 
+export type Context = {
+    prisma: PrismaClient
+    user: User | null
+}
+
 // Create a new Pothos schema builder
 export const builder = new SchemaBuilder<{
     PrismaTypes: PrismaTypes
+    Context: Context
 }>({
     plugins: [PrismaPlugin],
     prisma: {

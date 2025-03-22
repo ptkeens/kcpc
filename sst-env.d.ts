@@ -2,10 +2,21 @@
 /* tslint:disable */
 /* eslint-disable */
 /* deno-fmt-ignore-file */
-import "sst"
-export {}
+
 declare module "sst" {
   export interface Resource {
+    "JwtRefreshSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "JwtSecret": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
+    "SessionExpirationTime": {
+      "type": "sst.sst.Secret"
+      "value": string
+    }
     "kcpc-db": {
       "clusterArn": string
       "database": string
@@ -31,7 +42,10 @@ declare module "sst" {
     }
     "kcpc-web": {
       "type": "sst.aws.Remix"
-      "url": string
     }
   }
 }
+/// <reference path="sst-env.d.ts" />
+
+import "sst"
+export {}
