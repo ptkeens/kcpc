@@ -12,4 +12,5 @@ export default [
         // Add more authenticated routes here
     ]),
     route("login", "routes/login.tsx"),
+    route("register", "routes/register.tsx"),
 ] satisfies RouteConfig

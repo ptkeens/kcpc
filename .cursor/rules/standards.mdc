@@ -3,7 +3,8 @@ description:
 globs: 
 alwaysApply: true
 ---
-- This project is an SST3 typescript project using AWS as the backing infrastructure provider. 
+
+- This project is an SST3 (3.10.0) typescript project using AWS as the backing infrastructure provider. 
 - the API layer is graphql, all requests for data and mutations to data need to pass through this layer
 - We are using react-router for the frontend as well. 
 - Whenever you are supplying code-related suggestions that mention functions from a package, please check the root `package.json` file to see what version is in use, and ensure your suggetsions match up with the specified version. 

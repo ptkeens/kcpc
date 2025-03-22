@@ -1,5 +1,13 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+// Import all infrastructure modules
+import { createNetworkResources } from "./infra/network"
+import { createStorageResources } from "./infra/storage"
+import { createDatabaseResources } from "./infra/database"
+import { createSecretResources } from "./infra/secrets"
+import { createApiResources } from "./infra/api"
+import { createWebResources } from "./infra/web"
+
 export default $config({
     app(input) {
         return {
@@ -10,43 +18,38 @@ export default $config({
         }
     },
     async run() {
-        const vpc = new sst.aws.Vpc("kcpc-vpc", {
-            bastion: true,
-            nat: "managed",
-        })
+        // Create network resources
+        const { vpc } = createNetworkResources()
 
-        // image bucket for part images
-        const imageBucket = new sst.aws.Bucket("kcpc-image-store")
+        // Create storage resources
+        const { imageBucket } = createStorageResources()
 
-        // database
-        const db = new sst.aws.Aurora("kcpc-db", {
-            engine: "postgres",
+        // Create database resources
+        const { db } = createDatabaseResources(vpc)
+
+        // Create secret resources
+        const { secrets, allSecrets } = createSecretResources()
+
+        // Check for required environment variables
+        if (!process.env.DATABASE_URL) {
+            throw new Error("DATABASE_URL is not set")
+        }
+
+        // Create API resources
+        const { graphqlFunction } = createApiResources(
             vpc,
-            proxy: true,
-        })
+            db,
+            secrets,
+            allSecrets
+        )
 
-        // GraphQL API function with explicitly configured URL
-        const graphqlFunction = new sst.aws.Function("kcpc-graphql", {
-            handler: "api/graphql/api.handler",
-            link: [db],
+        // Create web resources
+        const { remix } = createWebResources(
             vpc,
-            environment: {
-                DATABASE_URL: $interpolate`postgresql://${db.username}:${db.password}@${db.host}:${db.port}/${db.database}`,
-            },
-            url: {
-                cors: true,
-                authorization: "none",
-            },
-            timeout: "30 seconds",
-            memory: "1024 MB",
-        })
-
-        // main remix app
-        const remix = new sst.aws.Remix("kcpc-web", {
-            link: [imageBucket, db, graphqlFunction],
-            domain: "kcpc.lucidine.com",
-            vpc,
-        })
+            db,
+            imageBucket,
+            graphqlFunction
+        )
 
         return {
             bucket: imageBucket.name,
