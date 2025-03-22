@@ -9,3 +9,4 @@ Frontend code is found in ./app/.
 Components are found in ./app/components.
 Routes are found in ./app/routes.
 Prisma-related files are found in ./prisma/.
+SST infra resources are defined in ./infra/.

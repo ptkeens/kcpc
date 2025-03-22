@@ -1,5 +1,13 @@
 /// <reference path="./.sst/platform/config.d.ts" />
 
+// Import all infrastructure modules
+import { createNetworkResources } from "./infra/network"
+import { createStorageResources } from "./infra/storage"
+import { createDatabaseResources } from "./infra/database"
+import { createSecretResources } from "./infra/secrets"
+import { createApiResources } from "./infra/api"
+import { createWebResources } from "./infra/web"
+
 export default $config({
     app(input) {
         return {
@@ -10,62 +18,38 @@ export default $config({
         }
     },
     async run() {
-        const vpc = new sst.aws.Vpc("kcpc-vpc", {
-            bastion: true,
-            nat: "managed",
-        })
+        // Create network resources
+        const { vpc } = createNetworkResources()
 
-        // image bucket for part images
-        const imageBucket = new sst.aws.Bucket("kcpc-image-store")
+        // Create storage resources
+        const { imageBucket } = createStorageResources()
 
-        // database
-        const db = new sst.aws.Aurora("kcpc-db", {
-            engine: "postgres",
-            vpc,
-            proxy: true,
-        })
+        // Create database resources
+        const { db } = createDatabaseResources(vpc)
 
-        // Create SST Secret resources
-        const secrets = {
-            JwtSecret: new sst.Secret("JwtSecret", "CHANGEME"),
-            JwtRefreshSecret: new sst.Secret("JwtRefreshSecret", "CHANGEME"),
-            SessionExpirationTime: new sst.Secret(
-                "SessionExpirationTime",
-                "CHANGEME"
-            ),
-        }
+        // Create secret resources
+        const { secrets, allSecrets } = createSecretResources()
 
-        const allSecrets = Object.values(secrets)
-
+        // Check for required environment variables
         if (!process.env.DATABASE_URL) {
             throw new Error("DATABASE_URL is not set")
         }
 
-        // GraphQL API function with secrets bound
-        const graphqlFunction = new sst.aws.Function("kcpc-graphql", {
-            handler: "api/graphql/api.handler",
-            link: [db, ...allSecrets],
+        // Create API resources
+        const { graphqlFunction } = createApiResources(
             vpc,
-            environment: {
-                DATABASE_URL: process.env.DATABASE_URL,
-                JWT_SECRET: secrets.JwtSecret.value,
-                JWT_REFRESH_SECRET: secrets.JwtRefreshSecret.value,
-                SESSION_EXPIRATION_TIME: secrets.SessionExpirationTime.value,
-            },
-            url: {
-                cors: true,
-                authorization: "none",
-            },
-            timeout: "30 seconds",
-            memory: "1024 MB",
-        })
+            db,
+            secrets,
+            allSecrets
+        )
 
-        // main remix app
-        const remix = new sst.aws.Remix("kcpc-web", {
-            link: [imageBucket, db, graphqlFunction],
-            domain: "kcpc.lucidine.com",
+        // Create web resources
+        const { remix } = createWebResources(
             vpc,
-        })
+            db,
+            imageBucket,
+            graphqlFunction
+        )
 
         return {
             bucket: imageBucket.name,
