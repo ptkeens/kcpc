@@ -3,6 +3,9 @@ import { schema } from "./schema"
 import { Context, prisma } from "./builder"
 import jwt from "jsonwebtoken"
 import { User } from "@prisma/client"
+import { Resource } from "sst"
+import { APIGatewayProxyEventV2 } from "aws-lambda"
+import { AuthenticationError } from "./models/auth/errors"
 
 // Define CORS headers for all responses
 const corsHeaders = {
@@ -64,9 +67,18 @@ const yoga = createYoga({
     },
 })
 
-// Export the handler function directly - no ApiHandler wrapper needed in SST v3
-export const handler = async (event) => {
-    // Handle OPTIONS method for CORS preflight requests
+export const requireAuth = (ctx: Context) => {
+    if (!ctx.user) {
+        throw new AuthenticationError("Not authenticated")
+    }
+    return ctx.user
+}
+
+export const authDirective = {
+    authenticated: true,
+}
+
+export const handler = async (event: APIGatewayProxyEventV2) => {
     if (event.requestContext?.http?.method === "OPTIONS") {
         return {
             statusCode: 200,
@@ -75,7 +87,6 @@ export const handler = async (event) => {
         }
     }
 
-    // Handle a root path health check
     if (event.rawPath === "/" && event.requestContext?.http?.method === "GET") {
         return {
             statusCode: 200,
@@ -90,9 +101,7 @@ export const handler = async (event) => {
         }
     }
 
-    // Handle potential errors
     try {
-        // Process the body - API Gateway can send base64 encoded bodies
         const body = (() => {
             if (!event.body) return null
             if (event.isBase64Encoded) {
@@ -122,7 +131,6 @@ export const handler = async (event) => {
             body: body,
         })
 
-        // Return the response
         return {
             statusCode: response.status,
             headers: {
@@ -132,25 +140,26 @@ export const handler = async (event) => {
             body: response.body,
         }
     } catch (error) {
-        // Detailed error logging
         console.error("GraphQL API error:", error)
 
-        // Return a properly formatted error response
         return {
             statusCode: 500,
             headers: {
                 "Content-Type": "application/json",
                 ...corsHeaders,
             },
-            body: JSON.stringify({
-                errors: [
-                    {
-                        message: "Internal server error",
-                        error: String(error),
-                        stack: error.stack,
-                    },
-                ],
-            }),
+            body:
+                Resource.App.stage === "production"
+                    ? "An error occurred"
+                    : JSON.stringify({
+                          errors: [
+                              {
+                                  message: "Internal server error",
+                                  error: String(error),
+                                  stack: error.stack,
+                              },
+                          ],
+                      }),
         }
     }
 }

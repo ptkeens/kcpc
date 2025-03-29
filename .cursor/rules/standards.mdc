@@ -16,3 +16,5 @@ alwaysApply: true
 - Please do not make changes to the code, suggest them and ask me if I would like you to apply them.
 - When you are allowed to make changes to the code, do so one step at a time and do not move on if there are issues with the code you suggested.
 - Create files with camel-case or pascal-case names. Do the same for variables and functions.
+- We should avoid using `any` or `as` as much as possible. Prefer `unknown` if we have to do something like this.
+- GraphQL Mutation resolvers should leverage services to do the business logic. Their implementation should be very clean and simple.

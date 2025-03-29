@@ -8,8 +8,10 @@ builder.queryField("health", (t) =>
 )
 
 // Import all type definitions
+import "./models/auth/errors"
 import "./models/user"
 import "./models/manufacturer"
+import "./models/auth/auth"
 
 // Build and export the schema
 export const schema = builder.toSchema()

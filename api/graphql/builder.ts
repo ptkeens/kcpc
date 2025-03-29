@@ -1,31 +1,35 @@
 import SchemaBuilder from "@pothos/core"
 import PrismaPlugin from "@pothos/plugin-prisma"
+import ErrorsPlugin from "@pothos/plugin-errors"
+import ScopeAuthPlugin from "@pothos/plugin-scope-auth"
 import type PrismaTypes from "./generated"
 import { PrismaClient, User } from "@prisma/client"
 
-// Create a new Prisma client instance
 export const prisma = new PrismaClient()
-
 export type Context = {
     prisma: PrismaClient
     user: User | null
 }
 
-// Create a new Pothos schema builder
 export const builder = new SchemaBuilder<{
     PrismaTypes: PrismaTypes
     Context: Context
+    AuthScopes: {
+        authenticated: boolean
+    }
 }>({
-    plugins: [PrismaPlugin],
+    plugins: [ScopeAuthPlugin, PrismaPlugin, ErrorsPlugin],
     prisma: {
         client: prisma,
-        // Include full Prisma model types
         filterConnectionTotalCount: true,
+    },
+    scopeAuth: {
+        // Define authentication scopes
+        authScopes: (context) => ({
+            authenticated: !!context.user,
+        }),
     },
 })
 
-// Add a default Query type (required)
 builder.queryType({})
-
-// Add a default Mutation type
 builder.mutationType({})
