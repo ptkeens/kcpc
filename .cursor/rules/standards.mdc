@@ -14,4 +14,5 @@ alwaysApply: true
 - The graphql context should have an authenticated and unauthenticated state
 - Please do not rush changes. Think through your answers, validate your assumptions. Double check package versions.
 - Please do not make changes to the code, suggest them and ask me if I would like you to apply them.
+- When you are allowed to make changes to the code, do so one step at a time and do not move on if there are issues with the code you suggested.
 - Create files with camel-case or pascal-case names. Do the same for variables and functions.
