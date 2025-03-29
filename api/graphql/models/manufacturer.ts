@@ -1,19 +1,13 @@
 import { builder, prisma } from "../builder"
 
-// Define Manufacturer type using Pothos Prisma plugin
 builder.prismaObject("Manufacturer", {
     fields: (t) => ({
         id: t.exposeID("id"),
         name: t.exposeString("name"),
-
-        // Relations
-        user: t.relation("User"),
     }),
 })
 
-// Add manufacturer queries
 builder.queryFields((t) => ({
-    // Get manufacturer by ID
     manufacturer: t.prismaField({
         type: "Manufacturer",
         nullable: true,
