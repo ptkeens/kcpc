@@ -1,7 +1,7 @@
 ---
 description: 
 globs: 
-alwaysApply: false
+alwaysApply: true
 ---
 GraphQL API code is in ./api/graphql.
 Schema definitions are found in ./api/graphql/models and should be logically grouped.
