@@ -11,11 +11,18 @@ export type Context = {
     user: User | null
 }
 
+export type AuthenticatedContext = Omit<Context, "user"> & {
+    user: User
+}
+
 export const builder = new SchemaBuilder<{
     PrismaTypes: PrismaTypes
     Context: Context
     AuthScopes: {
         authenticated: boolean
+    }
+    AuthContexts: {
+        authenticated: AuthenticatedContext
     }
 }>({
     plugins: [ScopeAuthPlugin, PrismaPlugin, ErrorsPlugin],

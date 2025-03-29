@@ -1,5 +1,4 @@
 import { builder, prisma } from "../builder"
-import { requireAuth } from "./auth/auth"
 
 builder.prismaObject("User", {
     fields: (t) => ({
@@ -13,33 +12,18 @@ builder.prismaObject("User", {
 
 // Add user queries
 builder.queryFields((t) => ({
-    // Get current user (protected)
-    me: t.prismaField({
-        type: "User",
-        nullable: true,
-        resolve: async (query, _root, _args, ctx) => {
-            // Use requireAuth to ensure the user is authenticated
-            const user = requireAuth(ctx)
-            return prisma.user.findUnique({
-                ...query,
-                where: { id: user.id },
-            })
-        },
-    }),
-    // Get user by ID (only returns current user)
-    user: t.prismaField({
-        type: "User",
-        nullable: true,
-        args: {
-            id: t.arg.string({ required: true }),
-        },
-        resolve: async (query, _root, args, ctx) => {
-            const user = requireAuth(ctx)
-
-            return await prisma.user.findUnique({
-                ...query,
-                where: { id: user.id },
-            })
-        },
-    }),
+    user: t
+        .withAuth({
+            authenticated: true,
+        })
+        .prismaField({
+            type: "User",
+            nullable: true,
+            resolve: async (query, _root, _args, ctx) => {
+                return await prisma.user.findUnique({
+                    ...query,
+                    where: { id: ctx.user.id },
+                })
+            },
+        }),
 }))
