@@ -1,9 +1,7 @@
-import { builder, Context } from "../../builder"
-import { prisma } from "../../builder"
-import { TokenExpiredError } from "jsonwebtoken"
-import { AuthPayload, LoginInput } from "./auth.types"
-import { AuthenticationError, GQLError } from "./errors"
 import { authService } from "../../../services/auth/auth.service"
+import { builder, prisma } from "../../builder"
+import { AuthPayload } from "./auth.types"
+import { AuthenticationError } from "./errors"
 
 // Define Auth input type
 const loginInput = builder.inputType("LoginInput", {
