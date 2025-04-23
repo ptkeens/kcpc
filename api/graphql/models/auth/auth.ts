@@ -24,6 +24,7 @@ builder.objectType(AuthPayloadRef, {
             type: "User",
             nullable: true,
             resolve: (query, parent) => {
+                // Re-fetch the user to ensure the full Prisma User type is returned
                 return prisma.user.findUnique({
                     ...query,
                     where: { id: parent.user.id },
@@ -46,14 +47,14 @@ builder.mutationFields((t) => ({
             }),
         },
         errors: {
-            types: [AuthenticationError, TokenExpiredError],
+            types: [AuthenticationError],
         },
         resolve: async (_root, args, _ctx) => {
-            const input = args.input as LoginInput
+            const { email, password } = args.input
 
             const { token, refreshToken, user } = await authService.login(
-                input.email,
-                input.password
+                email,
+                password
             )
 
             return {

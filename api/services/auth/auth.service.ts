@@ -52,9 +52,17 @@ export const authService = {
 
         const tokens = this.generateAuthTokens(user.id)
 
+        // Return only necessary user fields
+        const {
+            password: _password,
+            createdAt: _createdAt,
+            updatedAt: _updatedAt,
+            ...safeUser
+        } = user
+
         return {
             ...tokens,
-            user,
+            user: safeUser,
         }
     },
 
@@ -78,11 +86,25 @@ export const authService = {
                 throw new AuthenticationError("User not found or disabled")
             }
 
+            // Return only necessary user fields
+            const {
+                password: _password,
+                createdAt: _createdAt,
+                updatedAt: _updatedAt,
+                ...safeUser
+            } = user
+
             return {
                 tokens: this.generateAuthTokens(user.id),
-                user,
+                user: safeUser,
             }
         } catch (error) {
+            // Handle specific errors from jwt.verify
+            if (error instanceof TokenExpiredError) {
+                throw new AuthenticationError("Refresh token expired")
+            }
+            // Log unknown errors for debugging? Re-throw generic for now.
+            console.error("Refresh token verification failed:", error)
             throw new AuthenticationError("Invalid refresh token")
         }
     },

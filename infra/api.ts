@@ -14,7 +14,6 @@ export function createApiResources(vpc, db, secrets, allSecrets) {
             DATABASE_URL: process.env.DATABASE_URL,
             JWT_SECRET: secrets.JwtSecret.value,
             JWT_REFRESH_SECRET: secrets.JwtRefreshSecret.value,
-            SESSION_EXPIRATION_TIME: secrets.SessionExpirationTime.value,
         },
         url: {
             cors: true,
