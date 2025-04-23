@@ -1,9 +1,7 @@
-import { builder, Context } from "../../builder"
-import { prisma } from "../../builder"
-import { TokenExpiredError } from "jsonwebtoken"
-import { AuthPayload, LoginInput } from "./auth.types"
-import { AuthenticationError, GQLError } from "./errors"
 import { authService } from "../../../services/auth/auth.service"
+import { builder, prisma } from "../../builder"
+import { AuthPayload } from "./auth.types"
+import { AuthenticationError } from "./errors"
 
 // Define Auth input type
 const loginInput = builder.inputType("LoginInput", {
@@ -24,6 +22,7 @@ builder.objectType(AuthPayloadRef, {
             type: "User",
             nullable: true,
             resolve: (query, parent) => {
+                // Re-fetch the user to ensure the full Prisma User type is returned
                 return prisma.user.findUnique({
                     ...query,
                     where: { id: parent.user.id },
@@ -46,14 +45,14 @@ builder.mutationFields((t) => ({
             }),
         },
         errors: {
-            types: [AuthenticationError, TokenExpiredError],
+            types: [AuthenticationError],
         },
         resolve: async (_root, args, _ctx) => {
-            const input = args.input as LoginInput
+            const { email, password } = args.input
 
             const { token, refreshToken, user } = await authService.login(
-                input.email,
-                input.password
+                email,
+                password
             )
 
             return {
